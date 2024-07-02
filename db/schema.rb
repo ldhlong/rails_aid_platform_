@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_08_153525) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_02_070055) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,26 +42,33 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_08_153525) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-  create_table "help_requests", force: :cascade do |t|
-    t.string "title"
-    t.string "request_type"
-    t.text "description"
-    t.string "location"
+  create_table "conversations", force: :cascade do |t|
+    t.integer "sender_id"
+    t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "requests", force: :cascade do |t|
+  create_table "help_requests", primary_key: "request_count", force: :cascade do |t|
+    t.bigint "user_id", default: -> { "nextval('requests_id_seq'::regclass)" }, null: false
     t.string "title"
     t.string "request_type"
     t.text "description"
-    t.string "location"
     t.string "accepted_by_user"
     t.boolean "completion_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.float "latitude"
+    t.float "longitude"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "conversation_id"
+    t.integer "sender_id"
     t.integer "user_id"
-    t.index ["user_id"], name: "index_requests_on_user_id"
   end
 
   create_table "users", primary_key: "user_id", force: :cascade do |t|
