@@ -3,11 +3,10 @@ class MessagesController < ApplicationController
 
   # GET /messages
   def index
-    sender_id = params[:sender_id] # Correctly use sender_id from params
-    if sender_id.present?
+    user_id = params[:user_id] # Correctly use sender_id from params
+    if user_id.present?
       @messages = Message.select(:conversation_id, :sender_id, :user_id, :body, :created_at)
-                         .where(sender_id: sender_id)
-                         .order(conversation_id: :asc, created_at: :desc)
+                         .where('sender_id = :user_id OR user_id = :user_id', user_id: user_id)                         .order(conversation_id: :asc, created_at: :desc)
                          .distinct
                          .group_by(&:conversation_id)
                          .map { |_key, group| group.first } # Select the first message (last by created_at) for each conversation_id
@@ -17,6 +16,19 @@ class MessagesController < ApplicationController
     end
   end
 
+
+  # GET /messages/:conversation_id
+  def show_by_conversation
+    conversation_id = params[:conversation_id]
+    if conversation_id.present?
+      @messages = Message.where(conversation_id: conversation_id)
+                         .order(created_at: :desc)
+      render json: @messages
+    else
+      render json: { error: 'conversation_id is required' }, status: :unprocessable_entity
+    end
+  end
+  
   # POST /messages
   def create
     @message = Message.new(message_params)

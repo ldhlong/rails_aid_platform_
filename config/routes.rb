@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
   mount ActionCable.server => "/cable"
 
-  resources :messages
+  # Messages routes
+  resources :messages, only: [:index, :create, :update, :destroy]
+  get 'messages/:conversation_id', to: 'messages#show_by_conversation', as: 'messages_by_conversation'
 
   # Other routes
   get 'current_user', to: 'current_user#index'
