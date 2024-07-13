@@ -3,15 +3,17 @@ class MessagesController < ApplicationController
 
   # GET /messages
   def index
-    if params[:conversation_id]
-      @messages = Message.where(conversation_id: params[:conversation_id])
+    sender_id = params[:sender_id] # Correctly use sender_id from params
+    if sender_id.present?
+      @messages = Message.select(:conversation_id, :sender_id, :user_id, :body, :created_at)
+                         .where(sender_id: sender_id)
+                         .order(conversation_id: :asc, created_at: :desc)
+                         .distinct
+                         .group_by(&:conversation_id)
+                         .map { |_key, group| group.first } # Select the first message (last by created_at) for each conversation_id
       render json: @messages
     else
-      # Fetch unique conversations for the current user
-      @conversations = Message
-                        .select('DISTINCT ON (conversation_id) conversation_id, sender_id, user_id AS receiver_id')
-                        .where('sender_id = ? OR user_id = ?', accepted_by_user, accepted_by_user)
-      render json: @conversations
+      render json: { error: 'sender_id is required' }, status: :unprocessable_entity
     end
   end
 

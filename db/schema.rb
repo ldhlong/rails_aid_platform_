@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_02_070055) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_02_154526) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -69,6 +69,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_02_070055) do
     t.integer "conversation_id"
     t.integer "sender_id"
     t.integer "user_id"
+    t.index ["conversation_id"], name: "fki_conv"
   end
 
   create_table "users", primary_key: "user_id", force: :cascade do |t|
@@ -89,4 +90,5 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_02_070055) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "messages", "conversations"
 end
