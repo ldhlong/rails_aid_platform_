@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_02_154526) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_14_015558) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -47,6 +47,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_02_154526) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "help_request_id"
+    t.index ["help_request_id"], name: "index_conversations_on_help_request_id"
   end
 
   create_table "help_requests", primary_key: "request_count", force: :cascade do |t|
@@ -60,6 +62,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_02_154526) do
     t.datetime "updated_at", null: false
     t.float "latitude"
     t.float "longitude"
+    t.integer "conversation_id"
   end
 
   create_table "messages", force: :cascade do |t|

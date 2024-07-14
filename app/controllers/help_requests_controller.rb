@@ -1,3 +1,5 @@
+require 'securerandom'
+
 class HelpRequestsController < ApplicationController
   def index
     help_requests = HelpRequest.all
@@ -13,27 +15,42 @@ class HelpRequestsController < ApplicationController
     help_request = HelpRequest.new(help_request_params.merge(user_id: current_user_id))
 
     if help_request.save
-      render json: { message: 'Help request submitted successfully' }, status: :created
+      # Create a new conversation and associate its ID with the help_request
+      conversation = Conversation.create(
+        sender_id: help_request.user_id,
+        user_id: nil,  # Set to nil initially since accepted_by_user is nil
+        help_request_id: help_request.id
+      )
+
+      # Update help_request with conversation_id
+      help_request.update(conversation_id: conversation.id)
+
+      Message.create(
+        body: "Let's start the conversation!",
+        conversation_id: conversation.id,
+        sender_id: help_request.user_id,
+        user_id: nil  # Set to nil initially since accepted_by_user is nil
+      )
+
+      render json: help_request, status: :created
     else
       render json: { errors: help_request.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def update
-    help_request = HelpRequest.find(params[:request_count])
-    previous_status = help_request.completion_status
+    help_request = HelpRequest.find_by(request_count: params[:request_count])
     accepted_by_user = params[:help_request][:accepted_by_user]
 
-    Rails.logger.debug "Accepted by user: #{accepted_by_user}"
-
     if help_request.update(help_request_update_params.merge(accepted_by_user: accepted_by_user))
-      # Create a new conversation and message
-      conversation = Conversation.create(
-        sender_id: accepted_by_user, 
-        user_id: help_request.user_id
-      )
+      # Check if conversation already exists for this help_request
+      conversation = Conversation.find_or_create_by(help_request_id: help_request.id) do |conv|
+        conv.sender_id = accepted_by_user
+        conv.user_id = help_request.user_id
+      end
 
-      Rails.logger.debug "Conversation created with sender_id: #{conversation.sender_id} and user_id: #{conversation.user_id}"
+      # Update help_request with conversation_id
+      help_request.update(conversation_id: conversation.id)
 
       Message.create(
         body: "Let's start the conversation!",
@@ -56,12 +73,12 @@ class HelpRequestsController < ApplicationController
   private
 
   def current_user_id
-    # Retrieve user_id from the current session or authentication context
-    current_user.id
+    # Retrieve user_id from local storage or session
+    params[:help_request][:user_id]  # Adjust this to your actual method of retrieving user_id from local storage
   end
 
   def help_request_params
-    params.require(:help_request).permit(:title, :request_type, :description, :latitude, :longitude)
+    params.require(:help_request).permit(:title, :request_type, :description, :latitude, :longitude, :user_id)
   end
 
   def help_request_update_params

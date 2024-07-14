@@ -12,7 +12,7 @@ class Message < ApplicationRecord
                                    id: id,
                                    body: body,
                                    sender_id: sender_id,
-                                   user: user_id
+                                   user_id: user_id
                                  })
   end
 end

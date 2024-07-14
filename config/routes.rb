@@ -3,8 +3,10 @@ Rails.application.routes.draw do
 
   # Messages routes
   resources :messages, only: [:index, :create, :update, :destroy]
-  get 'messages/:conversation_id', to: 'messages#show_by_conversation', as: 'messages_by_conversation'
-
+  get 'messages/:conversation_id', to: 'messages#show_by_conversation', as: 'show_by_conversation'
+  get 'conversations', to: 'conversations#index'
+  get 'conversations/:conversation_id/user_id', to: 'conversations#user_id'
+  
   # Other routes
   get 'current_user', to: 'current_user#index'
 
