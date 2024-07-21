@@ -24,7 +24,7 @@ Rails.application.routes.draw do
   root 'home#index'
   post '/submit_request', to: 'help_requests#create'
   patch 'help_requests/:request_count', to: 'help_requests#update'
-  get 'completed_requests_count', to: 'help_requests#completed_requests_count'
+  get 'api/completed_requests_count', to: 'help_requests#completed_requests_count'
   get '/success', to: 'help_requests#success', as: 'success'
 
   # HelpRequests routes

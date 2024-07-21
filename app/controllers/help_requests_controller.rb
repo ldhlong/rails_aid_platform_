@@ -67,7 +67,8 @@ class HelpRequestsController < ApplicationController
 
   def completed_requests_count
     count = HelpRequest.where(completion_status: true).count
-    render json: { completed_requests_count: count }
+    Rails.logger.debug "Completed requests count: #{count}"
+    render json: { count: count }
   end
 
   private
