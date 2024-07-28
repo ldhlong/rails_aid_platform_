@@ -13,7 +13,7 @@ class MessagesController < ApplicationController
                          .map { |_key, group| group.first } # Select the first message (last by created_at) for each conversation_id
       render json: @messages
     else
-      render json: { error: 'sender_id is required' }, status: :unprocessable_entity
+      render json: { error: 'user_id is required' }, status: :unprocessable_entity
     end
   end
 
@@ -33,30 +33,26 @@ class MessagesController < ApplicationController
   def create
     @message = Message.new(message_params)
     current_user_id = params[:user_id]
-    
+
     # Fetch the associated help request
     help_request = HelpRequest.find_by(conversation_id: params[:conversation_id])
-    
+
     if help_request
-      # Set sender_id from help request's accepted_by_user
-      @message.sender_id = help_request.accepted_by_user
-  
-      # Fetch conversation to determine user_id
       conversation = Conversation.find_by(id: params[:conversation_id])
+      
       if conversation
-        # Determine user_id based on current_user_id and conversation details
-        if current_user_id.to_i == @message.sender_id
-          @message.user_id = conversation.user_id
+        if current_user_id.to_i == conversation.sender_id
           @message.sender_id = conversation.sender_id
+          @message.user_id = conversation.user_id
         else
-          @message.user_id = conversation.sender_id
           @message.sender_id = current_user_id.to_i
+          @message.user_id = conversation.sender_id
         end
       else
         render json: { error: "Conversation not found" }, status: :unprocessable_entity
         return
       end
-  
+
       if @message.save
         render json: @message, status: :created
       else
@@ -66,6 +62,7 @@ class MessagesController < ApplicationController
       render json: { error: "Help request not found" }, status: :unprocessable_entity
     end
   end
+
   private
 
   def set_message
