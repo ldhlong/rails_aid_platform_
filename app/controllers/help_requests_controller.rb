@@ -70,7 +70,7 @@ class HelpRequestsController < ApplicationController
             user_id: @help_request.user_id
           )
 
-          render json: @help_request, status: :ok
+          render json: { help_request: @help_request, conversation_id: conversation.id }, status: :ok
         else
           render json: { errors: @help_request.errors.full_messages }, status: :unprocessable_entity
         end

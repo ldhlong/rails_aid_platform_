@@ -29,39 +29,6 @@ class MessagesController < ApplicationController
     end
   end
   
-  # POST /messages
-  def create
-    @message = Message.new(message_params)
-    current_user_id = params[:user_id]
-
-    # Fetch the associated help request
-    help_request = HelpRequest.find_by(conversation_id: params[:conversation_id])
-
-    if help_request
-      conversation = Conversation.find_by(id: params[:conversation_id])
-      
-      if conversation
-        if current_user_id.to_i == conversation.sender_id
-          @message.sender_id = conversation.sender_id
-          @message.user_id = conversation.user_id
-        else
-          @message.sender_id = current_user_id.to_i
-          @message.user_id = conversation.sender_id
-        end
-      else
-        render json: { error: "Conversation not found" }, status: :unprocessable_entity
-        return
-      end
-
-      if @message.save
-        render json: @message, status: :created
-      else
-        render json: @message.errors, status: :unprocessable_entity
-      end
-    else
-      render json: { error: "Help request not found" }, status: :unprocessable_entity
-    end
-  end
 
   private
 
