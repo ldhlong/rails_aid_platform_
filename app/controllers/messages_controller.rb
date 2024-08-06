@@ -17,6 +17,17 @@ class MessagesController < ApplicationController
     end
   end
 
+  def create
+    message_params = params.require(:message).permit(:body, :conversation_id, :sender_id, :user_id)
+
+    message = Message.new(message_params)
+
+    if message.save
+      render json: message, status: :created
+    else
+      render json: { errors: message.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
   # GET /messages/:conversation_id
   def show_by_conversation
     conversation_id = params[:conversation_id]

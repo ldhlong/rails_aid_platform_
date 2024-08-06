@@ -1,17 +1,18 @@
 class HelpRequestsController < ApplicationController
+  before_action :set_help_request, only: [:show, :update, :mark_complete, :republish]
+
   def index
     # Fetch help requests with fewer than 5 assigned users
     help_requests = HelpRequest.where("assigned_users_count < ?", 5)
-  
+
     # Group by title and select the first entry in each group
     unique_requests = help_requests.group_by(&:title).values.map(&:first)
-  
+
     render json: unique_requests
   end
 
   def show
-    help_request = HelpRequest.find(params[:id])
-    render json: help_request
+    render json: @help_request
   end
 
   def create
@@ -88,15 +89,50 @@ class HelpRequestsController < ApplicationController
     render json: { count: count }
   end
 
+  def mark_complete
+    Rails.logger.debug "Parameters: #{params.inspect}"
+    help_request = HelpRequest.find_by(request_count: params[:request_count])
+
+    if help_request
+      help_request.update(
+        completion_status: params[:completion_status],
+        visible: params[:visible]
+      )
+      render json: { message: "Help request updated successfully" }, status: :ok
+    else
+      render json: { error: "Help request not found" }, status: :not_found
+    end
+  end
+
+  def republish
+    @help_request = HelpRequest.find_by(request_count: params[:request_count])
+    if @help_request
+      # Ensure the request is visible again and completion status is false
+      if @help_request.update(visible: true, completion_status: false)
+        render json: { message: 'Help request republished' }, status: :ok
+      else
+        render json: { errors: @help_request.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: 'Help request not found' }, status: :not_found
+    end
+  end
+
   private
 
+  def set_help_request
+    @help_request = HelpRequest.find_by(request_count: params[:request_count])
+    unless @help_request
+      render json: { error: 'Help request not found' }, status: :not_found
+    end
+  end
+
   def current_user_id
-    # Retrieve user_id from local storage or session
     params[:help_request][:user_id]  # Adjust this to your actual method of retrieving user_id from local storage
   end
 
   def help_request_params
-    params.require(:help_request).permit(:title, :request_type, :description, :latitude, :longitude, :user_id, :visible)
+    params.require(:help_request).permit(:title, :request_type, :description, :latitude, :longitude, :user_id, :visible, :request_count)
   end
 
   def help_request_update_params
