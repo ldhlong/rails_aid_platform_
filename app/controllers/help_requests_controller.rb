@@ -53,7 +53,7 @@ class HelpRequestsController < ApplicationController
         @help_request.increment!(:assigned_users_count)
 
         if @help_request.assigned_users_count >= 5
-          @help_request.update(completion_status: true)
+          @help_request.update(visible: false)
         end
 
         if @help_request.update(help_request_update_params)
@@ -104,15 +104,14 @@ class HelpRequestsController < ApplicationController
     end
   end
 
+ 
   def republish
-    @help_request = HelpRequest.find_by(request_count: params[:request_count])
-    if @help_request
-      # Ensure the request is visible again and completion status is false
-      if @help_request.update(visible: true, completion_status: false)
-        render json: { message: 'Help request republished' }, status: :ok
-      else
-        render json: { errors: @help_request.errors.full_messages }, status: :unprocessable_entity
-      end
+    # Use `params[:request_count]` since that's what is being logged
+    help_request = HelpRequest.find_by(request_count: params[:request_count])
+    
+    if help_request
+      help_request.update(visible: true, assigned_users_count: 0)
+      render json: { message: 'Help request republished successfully' }, status: :ok
     else
       render json: { error: 'Help request not found' }, status: :not_found
     end

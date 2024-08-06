@@ -11,8 +11,11 @@ class ConversationsController < ApplicationController
         user_id: conversation.user_id,
         last_message: last_message ? last_message.body : '',
         updated_at: last_message ? last_message.created_at : conversation.updated_at,
-        help_request_id: conversation.help_request_id, # Include help_request_id here
-        completion_status: help_request ? help_request.completion_status : nil # Include completion_status here
+        help_request_id: conversation.help_request_id,
+        created_at: help_request ? help_request.created_at : nil,
+        completion_status: help_request ? help_request.completion_status : nil,
+        visible: help_request ? help_request.visible : true,
+        assigned_users_count: help_request.assigned_users_count
       }
     }
   end
