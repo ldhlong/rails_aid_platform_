@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_22_003052) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_06_202201) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -48,6 +48,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_22_003052) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "help_request_id"
+    t.boolean "visible", default: true
     t.index ["help_request_id"], name: "index_conversations_on_help_request_id"
   end
 

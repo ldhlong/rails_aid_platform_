@@ -4,7 +4,7 @@ class HelpRequestsController < ApplicationController
   def index
     # Fetch help requests with fewer than 5 assigned users
     help_requests = HelpRequest.where("assigned_users_count < ?", 5)
-
+    
     # Group by title and select the first entry in each group
     unique_requests = help_requests.group_by(&:title).values.map(&:first)
 
@@ -49,12 +49,12 @@ class HelpRequestsController < ApplicationController
     accepted_by_user = params.dig(:help_request, :accepted_by_user)&.to_i
 
     if accepted_by_user.present?
-      if @help_request.assigned_users_count < 5
-        @help_request.increment!(:assigned_users_count)
+        if @help_request.assigned_users_count < 5
+          @help_request.increment!(:assigned_users_count)
 
-        if @help_request.assigned_users_count >= 5
-          @help_request.update(visible: false)
-        end
+          if @help_request.assigned_users_count >= 5
+            @help_request.update(visible: false)
+          end
 
         if @help_request.update(help_request_update_params)
           # Create a new conversation for each accepted user
@@ -88,35 +88,46 @@ class HelpRequestsController < ApplicationController
     Rails.logger.debug "Completed requests count: #{count}"
     render json: { count: count }
   end
-
   def mark_complete
     Rails.logger.debug "Parameters: #{params.inspect}"
     help_request = HelpRequest.find_by(request_count: params[:request_count])
-
+  
     if help_request
+      # Update the help request's completion status and set visible to false
       help_request.update(
-        completion_status: params[:completion_status],
-        visible: params[:visible]
+        completion_status: true, # Set completion_status to true
+        visible: false
       )
-      render json: { message: "Help request updated successfully" }, status: :ok
+  
+      # Find conversations related to the help request
+      conversations = Conversation.where(help_request_id: help_request.request_count)
+  
+      # Update the visibility of related conversations
+      conversations.update_all(visible: false)
+  
+      render json: { message: "Help request and related conversations updated successfully" }, status: :ok
     else
       render json: { error: "Help request not found" }, status: :not_found
     end
   end
 
- 
   def republish
-    # Use `params[:request_count]` since that's what is being logged
     help_request = HelpRequest.find_by(request_count: params[:request_count])
-    
-    if help_request
-      help_request.update(visible: true, assigned_users_count: 0)
-      render json: { message: 'Help request republished successfully' }, status: :ok
+    conversation = Conversation.find_by(id: params[:conversation_id])
+  
+    if help_request && conversation
+      # Update HelpRequest
+      help_request.decrement!(:assigned_users_count) # Assuming you have this field
+      help_request.update(visible: true)
+  
+      # Update Conversation
+      conversation.update(visible: false)
+  
+      render json: { message: "Help request republished successfully" }, status: :ok
     else
-      render json: { error: 'Help request not found' }, status: :not_found
+      render json: { error: "Help request or conversation not found" }, status: :not_found
     end
   end
-
   private
 
   def set_help_request
