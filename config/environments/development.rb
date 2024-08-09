@@ -38,7 +38,7 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
-  config.action_mailer.default_url_options = { host: 'https://backend-aid-b83f0dba9cf5.herokuapp.com/' }
+  config.action_mailer.default_url_options = { host: 'https://frontend-aid-25b7d93d6106.herokuapp.com' }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
