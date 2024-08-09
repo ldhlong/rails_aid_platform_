@@ -2,7 +2,6 @@
 class AddUserIdToUsers < ActiveRecord::Migration[6.0]
   def change
     remove_column :users, :id, :primary_key
-    add_column :users, :user_id
-    execute "ALTER TABLE users ADD PRIMARY KEY (user_id);"
+    add_column :users, :user_id :primary_key
   end
 end
