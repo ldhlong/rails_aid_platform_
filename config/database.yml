@@ -73,8 +73,8 @@ test:
 # the values provided in this file. Alternatively, you can specify a connection
 # URL environment variable explicitly:
 #
-#   production:
-#     url: <%= ENV["MY_APP_DATABASE_URL"] %>
+   production:
+     url: <%= ENV["MY_APP_DATABASE_URL"] %>
 #
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
@@ -82,5 +82,5 @@ test:
 production:
   <<: *default
   database: aid_platform_production
-  username: aid_platform
+  username: postgres
   password: <%= ENV["AID_PLATFORM_DATABASE_PASSWORD"] %>
