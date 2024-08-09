@@ -1,7 +1,6 @@
 class ChangePrimaryKeyToRequestCount < ActiveRecord::Migration[7.1]
   def up
-    # Add request_count as primary key
-    add_column :help_requests, :request_count, :primary_key
+   
 
     # Ensure request_count is unique and populated with unique values
     HelpRequest.reset_column_information
