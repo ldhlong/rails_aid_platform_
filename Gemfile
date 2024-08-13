@@ -12,6 +12,7 @@ gem 'rack-cors'
 
 gem 'devise'
 
+gem 'redis'
 
 gem 'devise-jwt'
 
