@@ -10,6 +10,7 @@ class HelpRequestsController < ApplicationController
   
     render json: unique_requests
   end
+  
 
   def show
     render json: @help_request
