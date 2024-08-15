@@ -8,7 +8,9 @@ class User < ApplicationRecord
  
   validates :first_name, presence: true, length: { maximum: 50 }
   validates :last_name, presence: true, length: { maximum: 50 }
-  
+
+ validates_presence_of :photo, :email
+
   def completed_requests_count
     help_requests.where(completion_status: true).count
   end
